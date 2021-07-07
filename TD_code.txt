@@ -1,0 +1,68 @@
+import pandas as pd
+import func
+import matplotlib.pyplot as plt
+from sklearn.preprocessing import MinMaxScaler
+import os
+import glob
+
+FDI_TYPE = 7
+avg_auc = 0
+avg_m20 = 0
+evaluation = pd.DataFrame(index=range(1, 11))
+i = 1
+for g_n in range(10):
+    # input tampered data
+    g1 = pd.read_csv("FDI" + str(FDI_TYPE) + "/g" + str(g_n) + ".csv")
+    # get all id
+    g_number = list(g1)
+    # observer meter
+    ob = pd.read_csv("observed/g" + str(g_n) + ".csv", squeeze=True, header=0)
+    # read tampered id
+    t_id = pd.read_csv("FDI" + str(FDI_TYPE) + "/g" + str(g_n) + "_id.csv", header=None)[0].map(str).tolist()
+
+    # get NTL
+    NTL = ob - g1.sum(axis=1)
+    # filter out negative value caused by float point
+    NTL[NTL < 0] = 0
+    # Normalize data
+    scaler = MinMaxScaler()
+    g1 = pd.DataFrame(scaler.fit_transform(g1), columns=list(g1))
+
+    '''
+    Uncomment the algorithm you want to implement and comment the MIC and FCM method.
+
+    '''
+    # score = func.LOF(g1)
+    # evaluation.at[i, 'auc_lof'] = func.compute_auc_1(score, set(g_number) - set(t_id), set(t_id))
+    # evaluation.at[i, 'map_lof'] = func.MAPatN(score, set(t_id), 20)
+
+    # score = func.FCM(g1)
+    # evaluation.at[i, 'auc_fcm'] = func.compute_auc_1(score, set(g_number) - set(t_id), set(t_id))
+    # evaluation.at[i, 'map_fcm'] = func.MAPatN(score, set(t_id), 20)
+
+    # mic_score = func.MIC(g1, NTL)
+    # evaluation.at[i, 'auc_mic'] = func.compute_auc_1(mic_score, set(g_number) - set(t_id), set(t_id))
+    # evaluation.at[i, 'map_mic'] = func.MAPatN(mic_score, set(t_id), 20)
+
+    # score = func.PCC(g1, NTL)
+    # evaluation.at[i, 'auc_pcc'] = func.compute_auc_1(score, set(g_number) - set(t_id), set(t_id))
+    # evaluation.at[i, 'map_pcc'] = func.MAPatN(score, set(t_id), 20)
+
+    # score = func.MI(g1, NTL)
+    # evaluation.at[i, 'auc_mi'] = func.compute_auc_1(score, set(g_number) - set(t_id), set(t_id))
+    # evaluation.at[i, 'map_mi'] = func.MAPatN(score, set(t_id), 20)
+
+    i += 1
+evaluation.loc['average'] = evaluation.mean()
+print(evaluation)
+evaluation.to_csv("out/FDI_" + str(FDI_TYPE) + ".csv")
+
+'''
+fig = plt.figure()
+scaler = MinMaxScaler()
+score = scaler.fit_transform(score)
+score = pd.DataFrame(score).sort_values(by=[0], ascending=False)
+x = range(42)
+plt.plot(x, score[0])
+plt.show()
+'''
